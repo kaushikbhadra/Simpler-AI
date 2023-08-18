@@ -11,6 +11,9 @@ export default function LandingPage() {
       <Link href='/sign-in'>
         <Button>Login</Button>
       </Link>
+      <Link href='/dashboard'>
+        <Button>Dashboard</Button>
+      </Link>
     </div>
   )
 }
