@@ -61,6 +61,7 @@ const routes = [
     label: 'Settings',
     icon: Settings,
     href: '/settings',
+    color: 'text-yellow-700'
   },
 ]
 
