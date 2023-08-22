@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare } from 'lucide-react'
+import { Code, Clipboard } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { OpenAI } from 'openai'
+import ReactMarkdown from 'react-markdown'
 
 import { Form, FormField, FormItem, FormControl } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -20,7 +21,7 @@ import { Loader } from '@/components/loader'
 import { BotAvatar } from '@/components/bot-avatar'
 import { UserAvatar } from '@/components/user-avatar'
 
-const ConversationPage = () => {
+const CodePage = () => {
   const router = useRouter()
   const [messages, setMessages] = useState<
     OpenAI.Chat.CreateChatCompletionRequestMessage[]
@@ -35,6 +36,32 @@ const ConversationPage = () => {
 
   const isLoading = form.formState.isSubmitting
 
+  const handleCopyClick = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (error) {
+      console.error('Failed to copy code to clipboard', error)
+    }
+  }
+
+  const renderCodeBlock: React.ElementType = ({ node, ...props }) => {
+    const codeText = props.children[0]
+
+    return (
+      <div className='flex justify-between'>
+        <code className='bg-black/10 rounded-lg p-1' {...props} />
+        <Button
+          variant='ghost'
+          size='icon'
+          className='hover:text-orange-700'
+          onClick={() => handleCopyClick(codeText)}
+        >
+          <Clipboard />
+        </Button>
+      </div>
+    )
+  }
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const userMessage: OpenAI.Chat.CreateChatCompletionRequestMessage = {
@@ -42,7 +69,7 @@ const ConversationPage = () => {
         content: values.prompt,
       }
       const newMessages = [...messages, userMessage]
-      const response = await axios.post('/api/conversation', {
+      const response = await axios.post('/api/code', {
         messages: newMessages,
       })
       setMessages((current) => [...current, userMessage, response.data])
@@ -58,11 +85,11 @@ const ConversationPage = () => {
   return (
     <div>
       <Heading
-        title='Coversation'
-        description='Our most advanced conversation model.'
-        icon={MessageSquare}
-        iconColor='text-violet-500'
-        bgColor='bg-violet-500/10'
+        title='Code Generation'
+        description='Generate code using descriptive text.'
+        icon={Code}
+        iconColor='text-green-700'
+        bgColor='bg-green-700/10'
       />
       <div className='px-4 lg:px-8'>
         <div>
@@ -79,7 +106,7 @@ const ConversationPage = () => {
                       <Input
                         className='border-0 p-2 outline-none focus-visible:ring-0 focus-visible:ring-transparent'
                         disabled={isLoading}
-                        placeholder='What is the diameter of the earth?'
+                        placeholder='How to add input validation using nextjs?'
                         {...field}
                       />
                     </FormControl>
@@ -118,7 +145,19 @@ const ConversationPage = () => {
                 )}
               >
                 {message.role === 'user' ? <UserAvatar /> : <BotAvatar />}
-                <p className='text-sm'>{message.content}</p>
+                <ReactMarkdown
+                  components={{
+                    pre: ({ node, ...props }) => (
+                      <div className='overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg'>
+                        <pre {...props} />
+                      </div>
+                    ),
+                    code: renderCodeBlock,
+                  }}
+                  className='text-sm overflow-hidden leading-7'
+                >
+                  {message.content || ''}
+                </ReactMarkdown>
               </div>
             ))}
           </div>
@@ -127,4 +166,4 @@ const ConversationPage = () => {
     </div>
   )
 }
-export default ConversationPage
+export default CodePage
