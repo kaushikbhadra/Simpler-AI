@@ -23,7 +23,6 @@ import { Card, CardFooter } from '@/components/ui/card'
 import { Empty } from '@/components/ui/empty'
 import Heading from '@/components/heading'
 import { amountOptions, formSchema, resolutionOptions } from './constants'
-import { cn } from '@/lib/utils'
 import { Loader } from '@/components/loader'
 
 const ImagePage = () => {
