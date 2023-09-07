@@ -7,6 +7,7 @@ import axios from 'axios'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 
 import { Form, FormField, FormItem, FormControl } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -42,6 +43,8 @@ const VideoPage = () => {
     } catch (error: any) {
       if (error?.response?.status === 403) {
         proModal.onOpen()
+      } else {
+        toast.error('Something went wrong!')
       }
     } finally {
       router.refresh()
